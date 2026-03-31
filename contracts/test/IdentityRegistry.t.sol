@@ -53,6 +53,13 @@ contract IdentityRegistryTest is Test {
         registry.updateURI(1, "ipfs://QmHackerCard");
     }
 
+
+    function test_Register_FromZeroAddressReverts() public {
+        vm.prank(address(0));
+        vm.expectRevert();
+        registry.register("ipfs://QmZero");
+    }
+
     function test_SetAgentWallet() public {
         vm.prank(agent1);
         registry.register("ipfs://QmAgentCard");

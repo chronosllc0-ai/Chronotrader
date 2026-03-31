@@ -8,7 +8,13 @@ from typing import Optional
 from web3 import Web3
 from eth_account import Account
 from eth_abi import encode
-from crewai_tools import tool
+try:
+    from crewai_tools import tool
+except Exception:
+    def tool(_name):
+        def deco(fn):
+            return fn
+        return deco
 
 
 # Uniswap V3 SwapRouter ABI (minimal)

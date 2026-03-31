@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Optional
 
 from eth_account import Account
-from eth_account.messages import encode_structured_data
+from eth_account.messages import encode_typed_data
 from web3 import Web3
 
 
@@ -81,7 +81,7 @@ def sign_trade_intent(
     """Sign a TradeIntent using EIP-712 typed data"""
 
     message = build_eip712_message(intent, verifying_contract, chain_id)
-    encoded = encode_structured_data(message)
+    encoded = encode_typed_data(full_message=message)
 
     account = Account.from_key(private_key)
     signed = account.sign_message(encoded)

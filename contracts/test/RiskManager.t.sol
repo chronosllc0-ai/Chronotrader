@@ -61,6 +61,13 @@ contract RiskManagerTest is Test {
         assertEq(peakCapital, 10500e18); // Peak updated
     }
 
+
+    function test_CheckRisk_AtMaxPositionBoundary() public view {
+        (bool approved, string memory reason) = riskManager.checkRisk(agentId, 1000e18);
+        assertTrue(approved);
+        assertEq(reason, "");
+    }
+
     function test_SetRiskParams_RevertNotOwner() public {
         vm.prank(address(0x999));
         vm.expectRevert("RiskManager: not agent owner");
