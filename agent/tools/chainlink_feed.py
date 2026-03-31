@@ -4,7 +4,16 @@ Provides real-time price data for trading strategy decisions
 """
 
 from web3 import Web3
-from crewai_tools import tool
+try:
+    from crewai.tools import tool
+except Exception:
+    try:
+        from crewai_tools import tool  # type: ignore
+    except Exception:
+        def tool(_name):
+            def deco(fn):
+                return fn
+            return deco
 from typing import Optional
 
 # Chainlink Aggregator V3 ABI (minimal)

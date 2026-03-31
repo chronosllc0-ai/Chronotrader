@@ -61,6 +61,39 @@ contract RiskManagerTest is Test {
         assertEq(peakCapital, 10500e18); // Peak updated
     }
 
+
+    function test_CheckRisk_AtMaxPositionBoundary() public view {
+        (bool approved, string memory reason) = riskManager.checkRisk(agentId, 1000e18);
+        assertTrue(approved);
+        assertEq(reason, "");
+    }
+
+    function test_CheckRisk_OneWeiOverMaxPositionFails() public view {
+        (bool approved, string memory reason) = riskManager.checkRisk(agentId, 1000e18 + 1);
+        assertFalse(approved);
+        assertEq(reason, "Exceeds max position size");
+    }
+
+    function test_CheckRisk_DailyLossBoundaryReachedFails() public {
+        // 5% loss from 10,000 => 9,500 should trip the limit (>=)
+        riskManager.updateCapital(agentId, 9500e18);
+        (bool approved, string memory reason) = riskManager.checkRisk(agentId, 100e18);
+        assertFalse(approved);
+        assertEq(reason, "Daily loss limit reached");
+    }
+
+    function test_CheckRisk_DrawdownBoundaryReachedFails() public {
+        // Step 1: raise peak above dailyStart
+        riskManager.updateCapital(agentId, 11000e18);
+        // Step 2: advance a day so dailyStart resets on next update
+        vm.warp(block.timestamp + 1 days + 1);
+        // Step 3: set current capital to exactly 15% below peak (11,000 -> 9,350)
+        riskManager.updateCapital(agentId, 9350e18);
+        (bool approved, string memory reason) = riskManager.checkRisk(agentId, 100e18);
+        assertFalse(approved);
+        assertEq(reason, "Max drawdown breached");
+    }
+
     function test_SetRiskParams_RevertNotOwner() public {
         vm.prank(address(0x999));
         vm.expectRevert("RiskManager: not agent owner");

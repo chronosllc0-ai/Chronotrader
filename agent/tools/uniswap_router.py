@@ -8,7 +8,17 @@ from typing import Optional
 from web3 import Web3
 from eth_account import Account
 from eth_abi import encode
-from crewai_tools import tool
+try:
+    from crewai.tools import tool
+except Exception:
+    try:
+        from crewai_tools import tool  # type: ignore
+    except Exception:
+        def tool(_name):
+            def deco(fn):
+                return fn
+            return deco
+from agent.core.nonce_manager import NonceManager
 
 
 # Uniswap V3 SwapRouter ABI (minimal)
@@ -33,6 +43,32 @@ SWAP_ROUTER_ABI = json.loads("""[
         "name": "exactInputSingle",
         "outputs": [{"name": "amountOut", "type": "uint256"}],
         "stateMutability": "payable",
+        "type": "function"
+    }
+]""")
+
+RISK_ROUTER_ABI = json.loads("""[
+    {
+        "name": "executeIntent",
+        "inputs": [
+            {
+                "name": "intent",
+                "type": "tuple",
+                "components": [
+                    {"name": "agentId", "type": "uint256"},
+                    {"name": "tokenIn", "type": "address"},
+                    {"name": "tokenOut", "type": "address"},
+                    {"name": "amountIn", "type": "uint256"},
+                    {"name": "minAmountOut", "type": "uint256"},
+                    {"name": "deadline", "type": "uint256"},
+                    {"name": "nonce", "type": "uint256"},
+                    {"name": "strategyHash", "type": "bytes32"}
+                ]
+            },
+            {"name": "signature", "type": "bytes"}
+        ],
+        "outputs": [{"name": "amountOut", "type": "uint256"}],
+        "stateMutability": "nonpayable",
         "type": "function"
     }
 ]""")
@@ -69,18 +105,20 @@ class UniswapClient:
     def __init__(self, rpc_url: str, private_key: str, router_address: str):
         self.w3 = Web3(Web3.HTTPProvider(rpc_url))
         self.account = Account.from_key(private_key)
+        self.nonce_manager = NonceManager(self.w3, self.account.address)
+        self.nonce_manager.initialize()
         self.router = self.w3.eth.contract(
             address=Web3.to_checksum_address(router_address),
             abi=SWAP_ROUTER_ABI,
         )
         self.router_address = Web3.to_checksum_address(router_address)
 
-    def _send_tx(self, tx_func, value=0):
+    def _send_tx(self, tx_func, value=0, nonce: Optional[int] = None):
         """Build, sign, and send a transaction"""
         tx = tx_func.build_transaction(
             {
                 "from": self.account.address,
-                "nonce": self.w3.eth.get_transaction_count(self.account.address),
+                "nonce": nonce if nonce is not None else self.nonce_manager.get_and_increment(),
                 "gas": 300000,
                 "gasPrice": self.w3.eth.gas_price,
                 "value": value,
@@ -152,6 +190,64 @@ def init_uniswap_tools(rpc_url: str, private_key: str, router_address: str):
     """Initialize the Uniswap client"""
     global _client
     _client = UniswapClient(rpc_url, private_key, router_address)
+
+
+def submit_via_risk_router(
+    intent_data,
+    private_key: str,
+    w3: Web3,
+    router_address: str,
+    nonce_manager: Optional[NonceManager] = None,
+) -> dict:
+    """Sign a TradeIntent with EIP-712 and submit to the hackathon Risk Router."""
+    from agent.tools.eip712_signer import sign_trade_intent
+
+    chain_id = w3.eth.chain_id
+    signed = sign_trade_intent(intent_data, private_key, router_address, chain_id)
+
+    intent_tuple = (
+        intent_data.agent_id,
+        Web3.to_checksum_address(intent_data.token_in),
+        Web3.to_checksum_address(intent_data.token_out),
+        intent_data.amount_in,
+        intent_data.min_amount_out,
+        intent_data.deadline,
+        intent_data.nonce,
+        intent_data.strategy_hash,
+    )
+    sig_bytes = bytes.fromhex(
+        signed["signature"]["r"][2:]
+        + signed["signature"]["s"][2:]
+        + hex(signed["signature"]["v"])[2:].zfill(2)
+    )
+
+    router = w3.eth.contract(
+        address=Web3.to_checksum_address(router_address),
+        abi=RISK_ROUTER_ABI,
+    )
+    account = Account.from_key(private_key)
+    if nonce_manager is None:
+        nonce_manager = NonceManager(w3, account.address)
+        nonce_manager.initialize()
+    nonce = nonce_manager.get_and_increment()
+
+    tx = router.functions.executeIntent(intent_tuple, sig_bytes).build_transaction(
+        {
+            "from": account.address,
+            "nonce": nonce,
+            "gas": 500000,
+            "gasPrice": int(w3.eth.gas_price * 1.2),
+        }
+    )
+    signed_tx = account.sign_transaction(tx)
+    tx_hash = w3.eth.send_raw_transaction(signed_tx.raw_transaction)
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash)
+
+    return {
+        "tx_hash": receipt.transactionHash.hex(),
+        "gas_used": receipt.gasUsed,
+        "success": receipt.status == 1,
+    }
 
 
 @tool("Execute Token Swap")

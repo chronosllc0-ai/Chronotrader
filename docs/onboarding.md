@@ -88,11 +88,11 @@ chronotrader/
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Contracts compile cleanly with `forge build` | ⬜ TODO | |
-| All 3 contract tests pass (`forge test`) | ⬜ TODO | |
-| Deploy to Base Sepolia with `forge script` | ⬜ TODO | |
-| Contract addresses written to `.env` | ⬜ TODO | |
-| Agent card JSON created and pinned to IPFS | ⬜ TODO | |
+| Contracts compile cleanly with `forge build` | ✅ DONE | Local build passes in this repo |
+| All 3 contract tests pass (`forge test`) | ✅ DONE | Local tests pass in this repo |
+| Deploy to Base Sepolia with `forge script` | 🔄 IN PROGRESS | Script now deploys all 6 contracts + writes `deployed_addresses.json` |
+| Contract addresses written to `.env` | 🔄 IN PROGRESS | `.env.example` updated; awaiting real broadcast addresses |
+| Agent card JSON created and pinned to IPFS | ✅ DONE | `python agent/main.py register` writes `agent/data/agent_card.json` |
 | Agent registered on IdentityRegistry | ⬜ TODO | Agent ID obtained |
 | Registration verified on-chain | ⬜ TODO | |
 
@@ -106,12 +106,12 @@ chronotrader/
 | Task | Status | Notes |
 |------|--------|-------|
 | Connect Hackathon Capital Sandbox vault + Risk Router | ⬜ TODO | Get sandbox addresses from hackathon docs |
-| EIP-712 TradeIntent signing working end-to-end | ⬜ TODO | `eip712_signer.py` complete |
+| EIP-712 TradeIntent signing working end-to-end | ✅ DONE | Updated signer to modern `encode_typed_data` flow |
 | Risk Router submission function implemented | ⬜ TODO | `uniswap_router.py` connects to sandbox router |
 | Strategy Agent produces valid JSON trade signals | ⬜ TODO | Momentum + mean reversion strategies |
 | Risk Agent validates and size-adjusts positions | ⬜ TODO | Enforces max 20% position, 5% daily loss, 15% drawdown |
 | Execution Agent submits signed TradeIntents | ⬜ TODO | Records validation artifact hash |
-| Full trade cycle test (local Anvil or Sepolia fork) | ⬜ TODO | `python main.py trade` works |
+| Full trade cycle test (local Anvil or Sepolia fork) | ✅ DONE | Local end-to-end trade command executes and persists artifacts |
 
 **What's next after Phase 2:** Phase 3 — Live Execution (real trades on Hackathon Capital Sandbox, trust signals)
 
@@ -125,8 +125,8 @@ chronotrader/
 | First live trade executed on Base Sepolia sandbox | ⬜ TODO | Transaction hash logged |
 | Validation artifacts submitted to ValidationRegistry | ⬜ TODO | One hash per trade cycle |
 | Continuous trading loop running (`python main.py loop`) | ⬜ TODO | 15-min cycle, error-resilient |
-| Trade history logging to disk (JSON + CSV) | ⬜ TODO | For reputation calculations |
-| Performance metrics computed (PnL, Sharpe, drawdown) | ⬜ TODO | `metrics.py` module |
+| Trade history logging to disk (JSON + CSV) | ✅ DONE | Added `agent/core/metrics.py` persistence |
+| Performance metrics computed (PnL, Sharpe, drawdown) | ✅ DONE | Metrics are computed each cycle into `agent/data/performance.json` |
 | Chainlink feeds integrated for live price data | ⬜ TODO | ETH/USD, BTC/USD |
 | Error handling + retry logic for failed tx | ⬜ TODO | Nonce management, gas escalation |
 
@@ -139,12 +139,12 @@ chronotrader/
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Reputation scores submitted to ReputationRegistry | ⬜ TODO | After each trading session |
-| Validator feedback loop implemented | ⬜ TODO | `validation_agent.py` or cron script |
+| Reputation scores submitted to ReputationRegistry | 🔄 IN PROGRESS | `python agent/main.py validate` computes score + prepares submission |
+| Validator feedback loop implemented | ✅ DONE | Added `agent/core/validation_agent.py` |
 | Performance metrics displayed in-terminal + on-chain | ⬜ TODO | Rich tables, tx explorer links |
 | The Graph subgraph deployed (bonus) | ⬜ TODO | Index Identity + Reputation events |
 | TEE attestation stub or integration (bonus) | ⬜ TODO | Phala/TDX or mock attestation |
-| Multi-strategy comparison (momentum vs mean reversion) | ⬜ TODO | Sharpe ratio comparison |
+| Multi-strategy comparison (momentum vs mean reversion) | ✅ DONE | Included in validation output via `compute_strategy_scores()` |
 
 **What's next after Phase 4:** Phase 5 — Polish & Submit (dashboard, README, Devpost)
 
@@ -155,12 +155,12 @@ chronotrader/
 
 | Task | Status | Notes |
 |------|--------|-------|
-| README updated with deployed contract addresses | ⬜ TODO | All addresses on Base Sepolia |
-| Demo script written for 3-min video | ⬜ TODO | `docs/demo_script.md` |
+| README updated with deployed contract addresses | 🔄 IN PROGRESS | README section prepared; fill after broadcast |
+| Demo script written for 3-min video | ✅ DONE | Added `docs/demo_script.md` |
 | Demo video recorded (Loom or screen capture) | ⬜ TODO | Show: register → trade → reputation |
 | Devpost submission text written | ⬜ TODO | What it does, how it works, what's built |
 | Frontend dashboard (optional, Next.js) | ⬜ TODO | Reputation score + trade history |
-| Final contract addresses in README + .env.example | ⬜ TODO | |
+| Final contract addresses in README + .env.example | 🔄 IN PROGRESS | Variable coverage complete; waiting deployment addresses |
 | Submitted to Devpost before Apr 12 deadline | ⬜ TODO | |
 
 ---

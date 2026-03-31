@@ -29,6 +29,7 @@ contract IdentityRegistry is ERC721URIStorage, IIdentityRegistry {
 
     /// @inheritdoc IIdentityRegistry
     function register(string calldata uri) external returns (uint256 agentId) {
+        require(msg.sender != address(0), "IdentityRegistry: zero address");
         agentId = _nextAgentId++;
         _safeMint(msg.sender, agentId);
         _setTokenURI(agentId, uri);
