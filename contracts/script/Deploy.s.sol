@@ -16,12 +16,13 @@ import {StrategyVault} from "../src/trading/StrategyVault.sol";
  * @dev Run: forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast
  */
 contract Deploy is Script {
-    // USDC on Base Sepolia: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
-    // WETH on Base Sepolia: 0x4200000000000000000000000000000000000006
-    address constant STABLECOIN_ADDRESS = 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
-
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("AGENT_PRIVATE_KEY");
+        address stablecoin = vm.envAddress("STABLECOIN_ADDRESS");
+        if (stablecoin == address(0)) {
+            stablecoin = 0x4200000000000000000000000000000000000006; // Base Sepolia WETH as mock stablecoin
+        }
+
         vm.startBroadcast(deployerPrivateKey);
 
         // 1. Deploy ERC-8004 Registries
@@ -41,11 +42,11 @@ contract Deploy is Script {
         RiskManager riskManager = new RiskManager(address(identityRegistry));
         console.log("RiskManager:", address(riskManager));
 
-        // 3. Deploy StrategyVault with USDC on Base Sepolia as stablecoin
+        // 3. Deploy StrategyVault with stablecoin
         StrategyVault strategyVault = new StrategyVault(
             address(identityRegistry),
             address(riskManager),
-            STABLECOIN_ADDRESS
+            stablecoin
         );
         console.log("StrategyVault:", address(strategyVault));
 
@@ -78,6 +79,6 @@ contract Deploy is Script {
                 '"}'
             )
         );
-        vm.writeJson(json, "deployed_addresses.json");
+        vm.writeJson(json, "contracts/deployed_addresses.json");
     }
 }
