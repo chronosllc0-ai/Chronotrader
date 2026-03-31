@@ -23,7 +23,15 @@ from rich.table import Table
 load_dotenv(Path(__file__).parent.parent / ".env")
 
 from agent.config import settings
-from agent.core.metrics import compute_metrics, load_trades, save_trade, write_performance
+from agent.core.metrics import (
+    compute_metrics,
+    load_metrics,
+    load_trades,
+    print_metrics_summary,
+    save_trade,
+    update_metrics,
+    write_performance,
+)
 from agent.core.validation_agent import run_validation
 from agent.tools import init_chainlink_tools, init_erc8004_tools
 
