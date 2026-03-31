@@ -125,10 +125,10 @@ chronotrader/
 | First live trade executed on Base Sepolia sandbox | ⬜ TODO | Transaction hash logged |
 | Validation artifacts submitted to ValidationRegistry | ⬜ TODO | One hash per trade cycle |
 | Continuous trading loop running (`python main.py loop`) | ⬜ TODO | 15-min cycle, error-resilient |
-| Trade history logging to disk (JSON + CSV) | ⬜ TODO | For reputation calculations |
+| Trade history logging to disk (JSON + CSV) | ✅ DONE | trade_logger.py created with JSON + CSV dual logging |
 | Performance metrics computed (PnL, Sharpe, drawdown) | ⬜ TODO | `metrics.py` module |
 | Chainlink feeds integrated for live price data | ⬜ TODO | ETH/USD, BTC/USD |
-| Error handling + retry logic for failed tx | ⬜ TODO | Nonce management, gas escalation |
+| Error handling + retry logic for failed tx | 🔄 IN PROGRESS | NonceManager created, gas escalation pending |
 
 **What's next after Phase 3:** Phase 4 — Trust & Reputation (validators score performance, on-chain reputation)
 
