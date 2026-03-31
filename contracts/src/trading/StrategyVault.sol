@@ -37,7 +37,6 @@ contract StrategyVault {
 
     event CapitalDelegated(uint256 indexed delegationId, address indexed delegator, uint256 indexed agentId, uint256 amount);
     event CapitalWithdrawn(uint256 indexed delegationId, address indexed delegator, uint256 amount);
-    event TradeExecuted(uint256 indexed agentId, address tokenIn, address tokenOut, uint256 amountIn, uint256 amountOut);
 
     constructor(
         address _identityRegistry,

@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {TradeIntent} from "./TradeIntent.sol";
 import {IdentityRegistry} from "../registries/IdentityRegistry.sol";
 
 /**
