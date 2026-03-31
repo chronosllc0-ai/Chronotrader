@@ -88,7 +88,7 @@ chronotrader/
 
 | Task | Status | Notes |
 |------|--------|-------|
-| Contracts compile cleanly with `forge build` | ⬜ TODO | |
+| Contracts compile cleanly with `forge build` | ✅ DONE | Installed forge-std + openzeppelin, fixed unused import, SCREAMING_SNAKE_CASE immutables |
 | All 3 contract tests pass (`forge test`) | ⬜ TODO | |
 | Deploy to Base Sepolia with `forge script` | ⬜ TODO | |
 | Contract addresses written to `.env` | ⬜ TODO | |

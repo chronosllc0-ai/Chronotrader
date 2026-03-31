@@ -14,11 +14,11 @@ import {RiskManager} from "./RiskManager.sol";
 contract StrategyVault {
     using SafeERC20 for IERC20;
 
-    IdentityRegistry public immutable identityRegistry;
-    RiskManager public immutable riskManager;
+    IdentityRegistry public immutable IDENTITY_REGISTRY;
+    RiskManager public immutable RISK_MANAGER;
 
     /// @dev The stablecoin used for capital (e.g., USDC)
-    IERC20 public immutable stablecoin;
+    IERC20 public immutable STABLECOIN;
 
     struct Delegation {
         address delegator;       // Who delegated the capital
@@ -44,9 +44,9 @@ contract StrategyVault {
         address _riskManager,
         address _stablecoin
     ) {
-        identityRegistry = IdentityRegistry(_identityRegistry);
-        riskManager = RiskManager(_riskManager);
-        stablecoin = IERC20(_stablecoin);
+        IDENTITY_REGISTRY = IdentityRegistry(_identityRegistry);
+        RISK_MANAGER = RiskManager(_riskManager);
+        STABLECOIN = IERC20(_stablecoin);
     }
 
     /// @notice Delegate capital to an agent
@@ -55,11 +55,11 @@ contract StrategyVault {
     function delegate(uint256 agentId, uint256 amount) external {
         require(amount > 0, "StrategyVault: zero amount");
         require(
-            identityRegistry.ownerOfAgent(agentId) != address(0),
+            IDENTITY_REGISTRY.ownerOfAgent(agentId) != address(0),
             "StrategyVault: agent not registered"
         );
 
-        stablecoin.safeTransferFrom(msg.sender, address(this), amount);
+        STABLECOIN.safeTransferFrom(msg.sender, address(this), amount);
 
         uint256 delegationId = nextDelegationId++;
         delegations[delegationId] = Delegation({
@@ -85,7 +85,7 @@ contract StrategyVault {
         d.active = false;
         agentCapital[d.agentId] -= d.amount;
 
-        stablecoin.safeTransfer(msg.sender, d.amount);
+        STABLECOIN.safeTransfer(msg.sender, d.amount);
 
         emit CapitalWithdrawn(delegationId, msg.sender, d.amount);
     }

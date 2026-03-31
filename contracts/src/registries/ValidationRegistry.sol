@@ -10,7 +10,7 @@ import {IdentityRegistry} from "./IdentityRegistry.sol";
  * @dev Agents submit data hashes for validation; validators score 0-100 on-chain
  */
 contract ValidationRegistry is IValidationRegistry {
-    IdentityRegistry public immutable identityRegistry;
+    IdentityRegistry public immutable IDENTITY_REGISTRY;
 
     struct ValidationRecord {
         uint256 validatorAgentId;
@@ -31,7 +31,7 @@ contract ValidationRegistry is IValidationRegistry {
     mapping(bytes32 => bool) public pendingRequests;
 
     constructor(address _identityRegistry) {
-        identityRegistry = IdentityRegistry(_identityRegistry);
+        IDENTITY_REGISTRY = IdentityRegistry(_identityRegistry);
     }
 
     /// @inheritdoc IValidationRegistry
@@ -95,9 +95,9 @@ contract ValidationRegistry is IValidationRegistry {
 
     /// @dev Helper to get agentId for a wallet address
     function _getAgentIdForWallet(address wallet) internal view returns (uint256) {
-        uint256 count = identityRegistry.agentCount();
+        uint256 count = IDENTITY_REGISTRY.agentCount();
         for (uint256 i = 1; i <= count; i++) {
-            if (identityRegistry.agentWallets(i) == wallet) {
+            if (IDENTITY_REGISTRY.agentWallets(i) == wallet) {
                 return i;
             }
         }

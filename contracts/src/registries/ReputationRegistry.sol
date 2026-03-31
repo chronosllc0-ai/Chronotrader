@@ -10,7 +10,7 @@ import {IdentityRegistry} from "./IdentityRegistry.sol";
  * @dev Server agents authorize clients to submit feedback, building on-chain reputation
  */
 contract ReputationRegistry is IReputationRegistry {
-    IdentityRegistry public immutable identityRegistry;
+    IdentityRegistry public immutable IDENTITY_REGISTRY;
 
     /// @dev serverAgentId => clientAgentId => feedbackHash => authorized
     mapping(uint256 => mapping(uint256 => mapping(bytes32 => bool))) public feedbackAuthorizations;
@@ -25,7 +25,7 @@ contract ReputationRegistry is IReputationRegistry {
     mapping(uint256 => uint8[]) public scoreHistory;
 
     constructor(address _identityRegistry) {
-        identityRegistry = IdentityRegistry(_identityRegistry);
+        IDENTITY_REGISTRY = IdentityRegistry(_identityRegistry);
     }
 
     /// @inheritdoc IReputationRegistry
@@ -87,9 +87,9 @@ contract ReputationRegistry is IReputationRegistry {
     function _getAgentIdForWallet(address wallet) internal view returns (uint256) {
         // Iterate through agents to find matching wallet
         // In production, use a reverse mapping for O(1) lookup
-        uint256 count = identityRegistry.agentCount();
+        uint256 count = IDENTITY_REGISTRY.agentCount();
         for (uint256 i = 1; i <= count; i++) {
-            if (identityRegistry.agentWallets(i) == wallet) {
+            if (IDENTITY_REGISTRY.agentWallets(i) == wallet) {
                 return i;
             }
         }

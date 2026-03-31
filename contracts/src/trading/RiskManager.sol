@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-import {TradeIntent} from "./TradeIntent.sol";
 import {IdentityRegistry} from "../registries/IdentityRegistry.sol";
 
 /**
@@ -16,7 +15,7 @@ import {IdentityRegistry} from "../registries/IdentityRegistry.sol";
  * - Whitelisted tokens only
  */
 contract RiskManager {
-    IdentityRegistry public immutable identityRegistry;
+    IdentityRegistry public immutable IDENTITY_REGISTRY;
 
     struct RiskParams {
         uint256 maxPositionSizeUsd;  // Max single position in USD (18 decimals)
@@ -49,7 +48,7 @@ contract RiskManager {
     event TokenWhitelisted(address indexed token, bool status);
 
     constructor(address _identityRegistry) {
-        identityRegistry = IdentityRegistry(_identityRegistry);
+        IDENTITY_REGISTRY = IdentityRegistry(_identityRegistry);
     }
 
     /// @notice Set risk parameters for an agent
@@ -62,7 +61,7 @@ contract RiskManager {
         uint256 dailyTradeLimit
     ) external {
         require(
-            identityRegistry.ownerOfAgent(agentId) == msg.sender,
+            IDENTITY_REGISTRY.ownerOfAgent(agentId) == msg.sender,
             "RiskManager: not agent owner"
         );
 
@@ -80,7 +79,7 @@ contract RiskManager {
     /// @notice Initialize agent capital tracking
     function initializeAgent(uint256 agentId, uint256 startingCapital) external {
         require(
-            identityRegistry.ownerOfAgent(agentId) == msg.sender,
+            IDENTITY_REGISTRY.ownerOfAgent(agentId) == msg.sender,
             "RiskManager: not agent owner"
         );
 
