@@ -56,13 +56,14 @@ def init_tools():
     init_chainlink_tools(rpc_url=settings.rpc_url)
     console.print("  ✅ Chainlink price feeds connected")
 
-    # TODO: Initialize with actual router address
-    # init_uniswap_tools(
-    #     rpc_url=settings.rpc_url,
-    #     private_key=settings.agent_private_key,
-    #     router_address=UNISWAP_ROUTER_ADDRESS,
-    # )
-    # console.print("  ✅ Uniswap router connected")
+    router_address = settings.sandbox_risk_router_address or settings.risk_router_address
+    if router_address:
+        init_uniswap_tools(
+            rpc_url=settings.rpc_url,
+            private_key=settings.agent_private_key,
+            router_address=router_address,
+        )
+        console.print("  ✅ Uniswap router connected")
 
 
 def create_agent_card() -> dict:
@@ -71,16 +72,16 @@ def create_agent_card() -> dict:
         "type": "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
         "name": settings.agent_name,
         "description": settings.agent_description,
-        "image": "",  # TODO: Add agent logo IPFS URI
+        "image": "",
         "services": [
             {
                 "name": "A2A",
-                "endpoint": "",  # TODO: Set agent A2A endpoint
+                "endpoint": "",
                 "version": "0.3.0",
             },
             {
                 "name": "web",
-                "endpoint": "",  # TODO: Set dashboard URL
+                "endpoint": "",
             },
         ],
         "x402Support": False,
@@ -115,8 +116,7 @@ def cmd_register():
     card_json = json.dumps(agent_card, indent=2)
     console.print(f"\n[yellow]Agent Card:[/yellow]\n{card_json}\n")
 
-    # TODO: Upload to IPFS and get URI
-    # For now, save locally
+    # Save agent card locally
     card_path = Path(__file__).parent / "data" / "agent_card.json"
     card_path.parent.mkdir(exist_ok=True)
     card_path.write_text(card_json)
@@ -127,7 +127,7 @@ def cmd_register():
         settings.openai_api_key, settings.openai_model
     )
     registration_task = create_registration_task(
-        execution_agent, f"ipfs://TODO/{card_path.name}"
+        execution_agent, f"file://{card_path.resolve()}"
     )
 
     crew = Crew(
@@ -206,7 +206,7 @@ def cmd_trade():
         exec_task = create_execution_task(
             execution_agent,
             approved_trade=str(risk_result),
-            agent_id=1,  # TODO: Use actual agent ID from registration
+            agent_id=settings.agent_id,
         )
 
         exec_crew = Crew(

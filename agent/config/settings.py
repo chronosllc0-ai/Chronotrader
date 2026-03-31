@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     )
 
     # ── Agent Configuration ─────────────────────────────────────────────
+    agent_id: int = Field(default=1, env="AGENT_ID")
     agent_name: str = Field(default="ChronoTrader", env="AGENT_NAME")
     agent_description: str = Field(
         default="Autonomous AI trading agent with ERC-8004 trust",
