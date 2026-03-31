@@ -13,6 +13,7 @@ from .uniswap_router import (
     init_uniswap_tools,
     execute_swap,
     check_balance,
+    submit_via_risk_router,
 )
 
 __all__ = [
@@ -26,4 +27,5 @@ __all__ = [
     "init_uniswap_tools",
     "execute_swap",
     "check_balance",
+    "submit_via_risk_router",
 ]

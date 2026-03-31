@@ -4,7 +4,7 @@ The brain of ChronoTrader. Analyzes market conditions and generates trade signal
 """
 
 from crewai import Agent, Task
-from langchain_openai import ChatOpenAI
+from crewai import LLM
 
 from agent.tools import get_token_price, get_market_summary, check_reputation
 
@@ -12,10 +12,10 @@ from agent.tools import get_token_price, get_market_summary, check_reputation
 def create_strategy_agent(openai_api_key: str, model: str = "gpt-4") -> Agent:
     """Create the Strategy Agent — responsible for market analysis and trade signals"""
 
-    llm = ChatOpenAI(
-        model=model,
+    llm = LLM(
+        model=f"openai/{model}",
         api_key=openai_api_key,
-        temperature=0.1,  # Low temp for consistent analysis
+        temperature=0.1,
     )
 
     return Agent(

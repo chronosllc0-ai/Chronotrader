@@ -4,7 +4,7 @@ The guardian of ChronoTrader. Ensures all trades pass risk checks before executi
 """
 
 from crewai import Agent, Task
-from langchain_openai import ChatOpenAI
+from crewai import LLM
 
 from agent.tools import get_token_price, check_balance
 
@@ -12,10 +12,10 @@ from agent.tools import get_token_price, check_balance
 def create_risk_agent(openai_api_key: str, model: str = "gpt-4") -> Agent:
     """Create the Risk Agent — responsible for risk management and trade validation"""
 
-    llm = ChatOpenAI(
-        model=model,
+    llm = LLM(
+        model=f"openai/{model}",
         api_key=openai_api_key,
-        temperature=0.0,  # Zero temp for deterministic risk checks
+        temperature=0.0,
     )
 
     return Agent(

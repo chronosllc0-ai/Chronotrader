@@ -4,7 +4,7 @@ The hands of ChronoTrader. Signs and submits trades, records validation artifact
 """
 
 from crewai import Agent, Task
-from langchain_openai import ChatOpenAI
+from crewai import LLM
 
 from agent.tools import execute_swap, check_balance, register_agent, check_reputation
 
@@ -12,10 +12,10 @@ from agent.tools import execute_swap, check_balance, register_agent, check_reput
 def create_execution_agent(openai_api_key: str, model: str = "gpt-4") -> Agent:
     """Create the Execution Agent — responsible for on-chain operations"""
 
-    llm = ChatOpenAI(
-        model=model,
+    llm = LLM(
+        model=f"openai/{model}",
         api_key=openai_api_key,
-        temperature=0.0,  # Zero temp for deterministic execution
+        temperature=0.0,
     )
 
     return Agent(
