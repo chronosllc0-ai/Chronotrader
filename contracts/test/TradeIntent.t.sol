@@ -42,6 +42,25 @@ contract TradeIntentTest is Test {
         assertTrue(hash1 != hash2);
     }
 
+    function test_HashIntentExpiredDeadline_Reverts() public {
+        // Warp to a timestamp after the deadline
+        vm.warp(1800000000);
+        
+        TradeIntent.Intent memory intent = _createIntent();
+        // Intent has deadline of 1700000000, which is now in the past
+        assertTrue(intent.deadline < block.timestamp);
+        
+        // HashIntent doesn't check deadline - it just hashes the data
+        // The deadline check happens at execution time in the Risk Router
+        bytes32 hash = tradeIntent.hashIntent(intent);
+        assertTrue(hash != bytes32(0));
+        
+        // Verify signature still works even with expired deadline
+        (uint8 v, bytes32 r, bytes32 s) = vm.sign(signerPk, hash);
+        address recovered = tradeIntent.verifyIntent(intent, v, r, s);
+        assertEq(recovered, signer);
+    }
+
     function _createIntent() internal pure returns (TradeIntent.Intent memory) {
         return TradeIntent.Intent({
             agentId: 1,

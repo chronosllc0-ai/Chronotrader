@@ -66,4 +66,11 @@ contract RiskManagerTest is Test {
         vm.expectRevert("RiskManager: not agent owner");
         riskManager.setRiskParams(agentId, 100e18, 100, 100, 10);
     }
+
+    function test_CheckRisk_BoundaryExactlyMaxSize() public view {
+        // Position at exactly max size (1000e18) should PASS
+        (bool approved, string memory reason) = riskManager.checkRisk(agentId, 1000e18);
+        assertTrue(approved);
+        assertEq(bytes(reason).length, 0);
+    }
 }

@@ -63,4 +63,10 @@ contract IdentityRegistryTest is Test {
 
         assertEq(registry.agentWallets(1), newWallet);
     }
+
+    function test_RegisterFromZeroAddress_Reverts() public {
+        vm.prank(address(0));
+        vm.expectRevert();
+        registry.register("ipfs://QmAgentCard");
+    }
 }
