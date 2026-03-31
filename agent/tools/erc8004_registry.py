@@ -7,7 +7,13 @@ import json
 from typing import Optional
 from web3 import Web3
 from eth_account import Account
-from crewai_tools import tool
+try:
+    from crewai_tools import tool
+except Exception:
+    def tool(_name):
+        def deco(fn):
+            return fn
+        return deco
 
 
 # ABI snippets for registry interactions
@@ -163,6 +169,13 @@ class ERC8004Client:
             self.reputation.functions.submitFeedback(server_agent_id, score, metadata)
         )
 
+
+    def submit_reputation_score(self, agent_id: int, score_bps: int, metadata: str) -> str:
+        """Submit 0-10000 basis-point score by mapping to uint8 expected by contract."""
+        mapped = max(1, min(99, score_bps // 100))
+        receipt = self.submit_feedback(agent_id, mapped, metadata)
+        return receipt["transactionHash"].hex()
+
     def request_validation(
         self, validator_id: int, server_id: int, data_hash: bytes
     ):
@@ -177,6 +190,10 @@ class ERC8004Client:
 # ── CrewAI Tool Wrappers ────────────────────────────────────────────────────
 
 _client: Optional[ERC8004Client] = None
+
+
+def get_erc8004_client() -> Optional[ERC8004Client]:
+    return _client
 
 
 def init_erc8004_tools(rpc_url: str, private_key: str, addresses: dict):
