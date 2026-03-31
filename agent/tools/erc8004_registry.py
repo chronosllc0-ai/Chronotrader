@@ -8,15 +8,12 @@ from typing import Optional
 from web3 import Web3
 from eth_account import Account
 try:
-    from crewai.tools import tool
+    from crewai_tools import tool
 except Exception:
-    try:
-        from crewai_tools import tool  # type: ignore
-    except Exception:
-        def tool(_name):
-            def deco(fn):
-                return fn
-            return deco
+    def tool(_name):
+        def deco(fn):
+            return fn
+        return deco
 
 
 # ABI snippets for registry interactions

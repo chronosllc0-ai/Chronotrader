@@ -9,16 +9,12 @@ from web3 import Web3
 from eth_account import Account
 from eth_abi import encode
 try:
-    from crewai.tools import tool
+    from crewai_tools import tool
 except Exception:
-    try:
-        from crewai_tools import tool  # type: ignore
-    except Exception:
-        def tool(_name):
-            def deco(fn):
-                return fn
-            return deco
-from agent.core.nonce_manager import NonceManager
+    def tool(_name):
+        def deco(fn):
+            return fn
+        return deco
 
 
 # Uniswap V3 SwapRouter ABI (minimal)
