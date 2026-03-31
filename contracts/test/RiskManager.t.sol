@@ -68,6 +68,28 @@ contract RiskManagerTest is Test {
         assertEq(reason, "");
     }
 
+    function test_CheckRisk_OneWeiOverMaxPositionFails() public view {
+        (bool approved, string memory reason) = riskManager.checkRisk(agentId, 1000e18 + 1);
+        assertFalse(approved);
+        assertEq(reason, "Exceeds max position size");
+    }
+
+    function test_CheckRisk_DailyLossBoundaryReachedFails() public {
+        // 5% loss from 10,000 => 9,500 should trip the limit (>=)
+        riskManager.updateCapital(agentId, 9500e18);
+        (bool approved, string memory reason) = riskManager.checkRisk(agentId, 100e18);
+        assertFalse(approved);
+        assertEq(reason, "Daily loss limit reached");
+    }
+
+    function test_CheckRisk_DrawdownBoundaryReachedFails() public {
+        // Drop from peak 10,000 to 8,500 => 15% drawdown should trip the limit (>=)
+        riskManager.updateCapital(agentId, 8500e18);
+        (bool approved, string memory reason) = riskManager.checkRisk(agentId, 100e18);
+        assertFalse(approved);
+        assertEq(reason, "Max drawdown breached");
+    }
+
     function test_SetRiskParams_RevertNotOwner() public {
         vm.prank(address(0x999));
         vm.expectRevert("RiskManager: not agent owner");

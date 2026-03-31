@@ -56,7 +56,7 @@ contract IdentityRegistryTest is Test {
 
     function test_Register_FromZeroAddressReverts() public {
         vm.prank(address(0));
-        vm.expectRevert();
+        vm.expectRevert("IdentityRegistry: zero address");
         registry.register("ipfs://QmZero");
     }
 
