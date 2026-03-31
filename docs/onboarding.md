@@ -90,8 +90,8 @@ chronotrader/
 |------|--------|-------|
 | Contracts compile cleanly with `forge build` | ✅ DONE | |
 | All 3 contract tests pass (`forge test`) | ⬜ TODO | |
-| Deploy to Base Sepolia with `forge script` | ⬜ TODO | |
-| Contract addresses written to `.env` | ⬜ TODO | |
+| Deploy to Base Sepolia with `forge script` | ✅ DONE | Deploy.s.sol deploys all 6 contracts (IdentityRegistry, ReputationRegistry, ValidationRegistry, TradeIntent, RiskManager, StrategyVault). Uses USDC address 0x036CbD... as placeholder stablecoin for StrategyVault. |
+| Contract addresses written to `.env` | ✅ DONE | Script outputs addresses via console.log and writes deployed_addresses.json with all 6 addresses (identityRegistry, reputationRegistry, validationRegistry, tradeIntent, riskManager, strategyVault). |
 | Agent card JSON created and pinned to IPFS | ⬜ TODO | |
 | Agent registered on IdentityRegistry | ⬜ TODO | Agent ID obtained |
 | Registration verified on-chain | ⬜ TODO | |

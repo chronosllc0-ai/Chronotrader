@@ -2,11 +2,13 @@
 pragma solidity ^0.8.24;
 
 import "forge-std/Script.sol";
+import "forge-std/console.sol";
 import {IdentityRegistry} from "../src/registries/IdentityRegistry.sol";
 import {ReputationRegistry} from "../src/registries/ReputationRegistry.sol";
 import {ValidationRegistry} from "../src/registries/ValidationRegistry.sol";
 import {TradeIntent} from "../src/trading/TradeIntent.sol";
 import {RiskManager} from "../src/trading/RiskManager.sol";
+import {StrategyVault} from "../src/trading/StrategyVault.sol";
 
 /**
  * @title Deploy
@@ -14,6 +16,10 @@ import {RiskManager} from "../src/trading/RiskManager.sol";
  * @dev Run: forge script script/Deploy.s.sol --rpc-url $RPC_URL --broadcast
  */
 contract Deploy is Script {
+    // USDC on Base Sepolia: 0x036CbD53842c5426634e7929541eC2318f3dCF7e
+    // WETH on Base Sepolia: 0x4200000000000000000000000000000000000006
+    address constant STABLECOIN_ADDRESS = 0x036CbD53842c5426634e7929541eC2318f3dCF7e;
+
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("AGENT_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
@@ -35,13 +41,13 @@ contract Deploy is Script {
         RiskManager riskManager = new RiskManager(address(identityRegistry));
         console.log("RiskManager:", address(riskManager));
 
-        // Note: StrategyVault requires a stablecoin address
-        // Deploy separately after configuring stablecoin for the target network
-        // StrategyVault vault = new StrategyVault(
-        //     address(identityRegistry),
-        //     address(riskManager),
-        //     STABLECOIN_ADDRESS
-        // );
+        // 3. Deploy StrategyVault with USDC on Base Sepolia as stablecoin
+        StrategyVault strategyVault = new StrategyVault(
+            address(identityRegistry),
+            address(riskManager),
+            STABLECOIN_ADDRESS
+        );
+        console.log("StrategyVault:", address(strategyVault));
 
         vm.stopBroadcast();
 
@@ -52,5 +58,26 @@ contract Deploy is Script {
         console.log("VALIDATION_REGISTRY_ADDRESS=", address(validationRegistry));
         console.log("TRADE_INTENT_ADDRESS=", address(tradeIntent));
         console.log("RISK_MANAGER_ADDRESS=", address(riskManager));
+        console.log("STRATEGY_VAULT_ADDRESS=", address(strategyVault));
+
+        // Write addresses to JSON file
+        string memory json = vm.toString(
+            abi.encodePacked(
+                '{"identityRegistry":"',
+                vm.toString(address(identityRegistry)),
+                '","reputationRegistry":"',
+                vm.toString(address(reputationRegistry)),
+                '","validationRegistry":"',
+                vm.toString(address(validationRegistry)),
+                '","tradeIntent":"',
+                vm.toString(address(tradeIntent)),
+                '","riskManager":"',
+                vm.toString(address(riskManager)),
+                '","strategyVault":"',
+                vm.toString(address(strategyVault)),
+                '"}'
+            )
+        );
+        vm.writeJson(json, "deployed_addresses.json");
     }
 }
